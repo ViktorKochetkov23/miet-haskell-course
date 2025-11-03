@@ -8,7 +8,9 @@ import Data.Word (Word8)
 
 -- используйте сопоставление с образцом
 xor :: Bool -> Bool -> Bool
-xor x y = error "todo"
+xor True False = True
+xor False True = True
+xor _ _ = False
 
 -- max3 x y z находит максимум из x, y и z
 -- max3 1 3 2 == 3
@@ -16,10 +18,11 @@ xor x y = error "todo"
 -- median3 x y z находит второе по величине число (медиану)
 -- median3 1 3 2 == 2
 -- median3 5 2 5 == 5
-max3, median3 :: Integer -> Integer -> Integer -> Integer
-max3 x y z = error "todo"
 
-median3 x y z = error "todo"
+max3, min3, median3 :: Integer -> Integer -> Integer -> Integer
+max3 x y z = max (max x y) z
+min3 x y z = min (min x y) z
+median3 x y z = x + y + z - max3 x y z - min3 x y z
 
 -- Типы данных, описывающие цвета в моделях 
 -- RGB (https://ru.wikipedia.org/wiki/RGB), компоненты от 0 до 255
@@ -36,8 +39,20 @@ data CMYK = CMYK { cyan :: Double, magenta :: Double, yellow :: Double, black ::
 
 -- Заметьте, что (/) для Int не работает, и неявного преобразования Int в Double нет.
 -- Это преобразование производится с помощью функции fromIntegral.
+
+min3d :: Double -> Double -> Double -> Double
+min3d x y z = min (min x y) z
+
 rbgToCmyk :: RGB -> CMYK
-rbgToCmyk color = error "todo"
+rbgToCmyk (RGB {red = r, green = g, blue = b}) = CMYK c m y bl
+    where
+        r_d = fromIntegral r / 255
+        g_d = fromIntegral g / 255
+        b_d = fromIntegral b / 255
+        bl = min3d (1 - r_d) (1 - g_d) (1 - b_d)
+        c = (1 - r_d - bl) / (1 - bl)
+        m = (1 - g_d - bl) / (1 - bl)
+        y = (1 - b_d - bl) / (1 - bl)
 
 -- geomProgression b q n находит n-й (считая с 0) член 
 -- геометрической прогрессии, нулевой член которой -- b, 
@@ -47,7 +62,10 @@ rbgToCmyk color = error "todo"
 -- используйте рекурсию
 -- не забудьте случаи n < 0 и n == 0.
 geomProgression :: Double -> Double -> Integer -> Double
-geomProgression b q n = error "todo"
+geomProgression b q n
+    | n == 0 = b
+    | n > 0 = q * geomProgression b q (n-1)
+    | otherwise = error "n < 0"
 
 -- coprime a b определяет, являются ли a и b взаимно простыми
 -- (определение: Целые числа называются взаимно простыми, 
@@ -64,4 +82,9 @@ geomProgression b q n = error "todo"
 -- обрабатываете отрицательные числа)
 -- https://hackage.haskell.org/package/base-4.9.0.0/docs/Prelude.html
 coprime :: Integer -> Integer -> Bool
-coprime a b = error "todo"
+
+bcd :: Integer -> Integer -> Integer
+bcd x 0 = abs x
+bcd x y = bcd y (mod x y)
+
+coprime a b = bcd a b == 1
