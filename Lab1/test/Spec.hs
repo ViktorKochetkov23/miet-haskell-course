@@ -74,4 +74,19 @@ main = hspec $ do
             listToNel [1,2,3] `shouldBe` nel1
         it "nelToList" $ do
             nelToList nel1 `shouldBe` [1,2,3]
-    describe "luhn" $ it "" pending
+    describe "luhn" $ do
+        it "digitsReverseList" $ do
+            digitsReverseList 123 `shouldBe` [3, 2, 1]
+            digitsReverseList 321 `shouldBe` [1, 2, 3]
+        it "doubleEven" $ do
+            doubleEven True 5  `shouldBe` 1
+            doubleEven True 4  `shouldBe` 8
+            doubleEven False 9 `shouldBe` 9
+        it "mapMany" $ do
+            mapMany [even, odd] [1,2]  `shouldBe` [False, False]
+            mapMany [even, odd] [2,1]  `shouldBe` [True, True]
+            mapMany [even, even] [2,1] `shouldBe` [True, False]
+            mapMany [odd, odd] [2,1]   `shouldBe` [False, True]
+        it "isLuhnValid" $ do
+            isLuhnValid 4561261212345464 `shouldBe` False
+            isLuhnValid 4561261215345467 `shouldBe` True

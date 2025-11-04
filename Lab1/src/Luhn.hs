@@ -11,4 +11,27 @@ module Luhn where
 -- Например: разбить число на цифры (возможно, сразу в обратном порядке).
 -- Не забудьте добавить тесты, в том числе для вспомогательных функций!
 isLuhnValid :: Int -> Bool
-isLuhnValid = error "todo"
+isLuhnValid cardNumber = sum (doDoublEven (digitsReverseList cardNumber)) `mod` 10 == 0
+
+digitsReverseList :: Int -> [Int]
+digitsReverseList 0 = []
+digitsReverseList n = n `mod` 10 : digitsReverseList (n `div` 10)
+
+doubleEven :: Bool -> Int -> Int
+doubleEven False dig = dig
+doubleEven True dig = let z = dig * 2 in (if z > 9 then z - 9 else z)
+
+mapMany :: [a -> b] -> [a] -> [b] 
+mapMany [] [] = []
+mapMany fs xs
+    | length fs /= length xs = error "Functors and args amounts are different"
+    | otherwise = head fs (head xs) : mapMany (tail fs) (tail xs)
+
+generateDoubleEvens :: Int -> Bool -> [Int -> Int]
+generateDoubleEvens 1 _even = [doubleEven _even]
+generateDoubleEvens n _even
+    | n > 1 = doubleEven _even : generateDoubleEvens (n - 1) (not _even)
+    | otherwise = error "Amount of functions cant be less than 1"
+
+doDoublEven :: [Int] -> [Int]
+doDoublEven xs = mapMany (generateDoubleEvens (length xs) True) xs
