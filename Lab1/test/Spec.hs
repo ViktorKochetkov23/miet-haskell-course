@@ -37,15 +37,41 @@ main = hspec $ do
             coprime 10 15 `shouldBe` False
             coprime 12 35 `shouldBe` True
     describe "lists" $ do
-        it "distance" pending
-        it "intersect" pending
-        it "zipN" pending
-        it "find" pending
-        it "findLast" pending
-        it "mapFuncs" pending
-        it "tailNel" pending
-        it "lastNel" pending
-        it "zipNel" pending
-        it "listToNel" pending
-        it "nelToList" pending
+        let nel1 = NEL 1 [2, 3]
+        let nel2 = NEL 2 [4, 5]
+        it "distance" $ do
+            distance (Point [1.0, 0.0]) (Point [0.0, 1.0]) `shouldBe` sqrt 2.0
+            distance (Point [0.0, 0.0]) (Point [0.0, 1.0]) `shouldBe` 1.0
+        it "intersect" $ do
+            intersect [1, 2, 4, 6] [5, 4, 2, 5, 7] `shouldSatisfy` (\x -> x == [2, 4] || x == [4, 2])
+            intersect [1, 2, 4, 6] [3, 5, 7]       `shouldBe` []
+        it "zipN" $ do
+            zipN [[1, 2, 3], [4, 5, 6], [7, 8, 9]] `shouldBe` [[1, 4, 7], [2, 5, 8], [3, 6, 9]]
+            zipN [[1, 2, 3], [4, 5], [6]]          `shouldBe` [[1, 4, 6], [2, 5], [3]]
+        it "find" $ do
+            find (> 0) [-1, 2, -3, 4] `shouldBe` Just 2
+            find (> 0) [-1, -2, -3]   `shouldBe` Nothing
+        it "findWithFilter" $ do
+            findWithFilter (> 0) [-1, 2, -3, 4] `shouldBe` Just 2
+            findWithFilter (> 0) [-1, -2, -3]   `shouldBe` Nothing
+        it "findLast" $ do
+            findLast (> 0) [-1, 2, -3, 4] `shouldBe` Just 4
+        it "mapFuncs" $ do
+            mapFuncs [\x -> x*x, (1 +), \x -> if even x then 1 else 0] 3 `shouldBe` [9, 4, 0]
+        it "satisfiesAll" $ do
+            satisfiesAll [even, \x -> x `rem` 5 == 0] 10 `shouldBe` True
+            satisfiesAll [] 4                          `shouldBe` True
+            satisfiesAll [(> 2), (< 4)] 5              `shouldBe` False
+        it "tailNel" $ do
+            tailNel nel1 `shouldBe` [2, 3]
+            tailNel nel2 `shouldBe` [4, 5]
+        it "lastNel" $ do
+            lastNel nel1 `shouldBe` 3
+            lastNel nel2 `shouldBe` 5
+        it "zipNel" $ do
+            zipNel nel1 nel2 `shouldBe` NEL (1, 2) [(2, 4), (3, 5)]
+        it "listToNel" $ do
+            listToNel [1,2,3] `shouldBe` nel1
+        it "nelToList" $ do
+            nelToList nel1 `shouldBe` [1,2,3]
     describe "luhn" $ it "" pending
