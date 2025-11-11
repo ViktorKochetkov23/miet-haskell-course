@@ -118,9 +118,9 @@ lastNel (NEL x xs)
 zipNel :: NEL a -> NEL b -> NEL (a, b)
 zipNel (NEL x xs) (NEL y ys) = NEL (x, y) (zip xs ys)
 
-listToNel :: [a] -> NEL a
-listToNel [] = error "Can't make NEL from empty list"
-listToNel (x: xs) = NEL x xs
+listToNel :: [a] -> Maybe (NEL a)
+listToNel [] = Nothing
+listToNel (x: xs) = Just (NEL x xs)
 
 nelToList :: NEL a -> [a]
 nelToList (NEL x xs) = x: xs

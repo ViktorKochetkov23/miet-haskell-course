@@ -71,7 +71,8 @@ main = hspec $ do
         it "zipNel" $ do
             zipNel nel1 nel2 `shouldBe` NEL (1, 2) [(2, 4), (3, 5)]
         it "listToNel" $ do
-            listToNel [1,2,3] `shouldBe` nel1
+            (listToNel [] :: Maybe (NEL Int)) `shouldBe` Nothing  --Int просто чтобы shouldBe пропускал
+            listToNel [1,2,3] `shouldBe` Just nel1
         it "nelToList" $ do
             nelToList nel1 `shouldBe` [1,2,3]
     describe "luhn" $ do
