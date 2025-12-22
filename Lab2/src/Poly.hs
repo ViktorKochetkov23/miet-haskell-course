@@ -1,7 +1,13 @@
 -- Не забудьте добавить тесты.
 
 module Poly where
-import Lists (zipN)
+
+zipN :: [[a]] -> [[a]]
+zipN xss
+    | all null xss = []
+    | otherwise = map head nonEmpty : zipN (map tail nonEmpty)
+    where
+        nonEmpty = filter (not . null) xss
 
 -- Многочлены
 -- a -- тип коэффициентов, список начинается со свободного члена.
@@ -109,10 +115,15 @@ class Num a => Differentiable a where
     deriv  :: a -> a
     -- взятие n-ной производной
     nderiv :: Int -> a -> a
-    nderiv = undefined
-
+    nderiv n x
+        | n < 0 = error "Negative order derivative is not defined"
+        | n == 0 = x
+        | n > 0 = deriv (nderiv (n - 1) x)
 -- Задание 9 -----------------------------------------
 
 -- Определите экземпляр класса типов
 instance Num a => Differentiable (Poly a) where
-    deriv = undefined
+    deriv (P coefs)
+        | null new_coefs = P [0]
+        | otherwise = P new_coefs
+        where new_coefs = drop 1 (map (\(order, coef) -> fromIntegral order * coef) (enumerate coefs))
