@@ -49,8 +49,8 @@ instance (Num a, Eq a) => Eq (Poly a) where
 
 -- Задание 4 -----------------------------------------
 
--- Определите перевод многочлена в строку. 
--- Это должна быть стандартная математическая запись, 
+-- Определите перевод многочлена в строку.
+-- Это должна быть стандартная математическая запись,
 -- например: show (3 * x * x + 1) == "3 * x^2 + 1").
 -- (* и + для многочленов можно будет использовать после задания 6.)
 
@@ -90,8 +90,8 @@ plus (P xs) (P ys) = P (map sum (zipN [xs, ys]))
 
 -- Определите умножение многочленов
 times :: Num a => Poly a -> Poly a -> Poly a
-times (P xs) (P ys) = P [sum [a * b | (i, a) <- enumerate xs, 
-                                        (j, b) <- enumerate ys, 
+times (P xs) (P ys) = P [sum [a * b | (i, a) <- enumerate xs,
+                                        (j, b) <- enumerate ys,
                                         i + j == k]
                             | k <- [0..(length xs + length ys - 2)]]
 -- Задание 7 -----------------------------------------
@@ -100,9 +100,9 @@ times (P xs) (P ys) = P [sum [a * b | (i, a) <- enumerate xs,
 instance Num a => Num (Poly a) where
     (+) = plus
     (*) = times
-    negate (P xs) = P (map negate xs)  
+    negate (P xs) = P (map negate xs)
     fromInteger x = P [fromInteger x]
-    -- Эти функции оставить как undefined, поскольку для 
+    -- Эти функции оставить как undefined, поскольку для
     -- многочленов они не имеют математического смысла
     abs    = undefined
     signum = undefined
