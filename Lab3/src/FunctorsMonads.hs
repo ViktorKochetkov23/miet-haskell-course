@@ -26,9 +26,9 @@ infixl 4 <**>
 -- реализуйте join' через >>== и наоборот
 class Applicative' m => Monad' m where
   (>>==) :: m a -> (a -> m b) -> m b
-  (>>==) = error "implement using join' (and Applicative')"
+  monadObj >>== f = join' (f <$$> monadObj)
   join' :: m (m a) -> m a
-  join' = error "implement using >>== (and Applicative')"
+  join' monadObj = monadObj >>== id
 
 -- пример
 instance Functor' Maybe where
@@ -70,32 +70,36 @@ instance Monad' [] where
 -- liftA2' (+) (Just 1) (Just 2) == Just 3
 -- liftA2' (+) Nothing (Just 2) == Nothing
 liftA2' :: Applicative' f => (a -> b -> c) -> f a -> f b -> f c
-liftA2' = undefined
+liftA2' f appl1 appl2 = f <$$> appl1 <**> appl2
 
 -- Выполняет все действия в списке и собирает их результаты в один список
 -- seqA [Just 1, Just 2] == Just [1, 2]
 -- seqA [Just 1, Just 2, Nothing] == Nothing
 seqA :: Applicative' f => [f a] -> f [a]
-seqA = undefined
+seqA [] = pure' []
+seqA (x:xs) = (:) <$$> x <**> seqA xs
 
 -- Применяет функцию, возвращающую действия, ко всем элементам списка, выполняет эти действия
 -- и собирает результаты в список
 -- traverseA Just [1, 2] == Just [1, 2]
 -- traverseA (\a -> if a > 2 then Just a else Nothing) [1, 3] == Nothing
 traverseA :: Applicative' f => (a -> f b) -> [a] -> f [b]
-traverseA = undefined
+traverseA f xs = seqA (map f xs)
 
 -- Фильтрует список, используя "предикат с эффектом".
 -- filterA (\a -> if a > 10 then Nothing else Just (a > 0)) [-1, -2, 1, 2] == Just [1, 2]
 -- filterA (\a -> if a < 0 then Nothing else Just (a > 1)) [-1, -2, 1, 2] == Nothing
 filterA :: Applicative' f => (a -> f Bool) -> [a] -> f [a]
-filterA = undefined
+filterA p [] = pure' []
+filterA p (x:xs) = let
+    cond b rest = if b then x:rest else rest
+  in cond <$$> p x <**> filterA p xs
 
 -- Композиция монадических функций
 -- composeM Just Just == Just (т.е. для всех x: composeM Just Just x == Just x)
 -- composeM Just (const Nothing) == const Nothing
 composeM :: Monad' m => (b -> m c) -> (a -> m b) -> (a -> m c)
-composeM = undefined
+composeM f g = join' . (f <$$>) . g
 
 -- Задание 3 -----------------------------------------
 
