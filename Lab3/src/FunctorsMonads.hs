@@ -108,15 +108,24 @@ composeM f g = join' . (f <$$>) . g
 -- Добавьте тесты на поведение функций из задания 2 с этими экземплярами
 
 instance Functor' (Either t) where
-  (<$$>) = undefined
+  _ <$$> Left a = Left a
+  f <$$> Right a = Right (f a)
+
 instance Applicative' (Either t) where
-  pure' = undefined
-  (<**>) = undefined
+  pure' = Right
+  Left  e <**> _ = Left e
+  Right f <**> r = f <$$> r
+
 instance Monad' (Either t) where
+  (Right x) >>== f = f x
+  (Left x) >>== _ = Left x
 
 instance Functor' ((->) t) where -- (->) a b -- то же самое, что a -> b
-  (<$$>) = undefined
+  f <$$> x = f . x
+
 instance Applicative' ((->) t) where
-  pure' = undefined
-  (<**>) = undefined
+  pure' x = (\y -> x)
+  f <**> x = (\t -> f t (x t))
+
 instance Monad' ((->) t) where
+  x >>== f = (\t -> f (x t) t)
