@@ -95,4 +95,22 @@ main = hspec $ do
                     let add2 = (+2)
                     \(x::Int) (y::Int)-> let u = pure' add2 in (u <**> pure' x) y `shouldBe` (pure' ($ x) <**> u) y
     describe "streams" $ do
-        it "" $ pending
+        it "streamToList & sTake" $ do
+            sTake 10000 ruler `shouldBe` take 10000 (streamToList ruler)
+        prop "sRepeat" $ do
+            \(x::Int) -> sTake 100 (sRepeat x) `shouldBe` replicate 100 x
+        prop "sCycle" $ do
+            \(xs::[Int]) -> sTake (2 * length xs) (sCycle xs) `shouldBe` xs ++ xs
+        prop "sIterate" $ do
+            \(x::Int) -> sTake 100 (sIterate (+1) x) `shouldBe` take 100 (iterate (+1) x)
+        it "sInterleave" $ do
+            let zeros = sRepeat 0
+            let checkInterleave s1 (x :> s2) = x : sTake 100 (sInterleave s1 s2) `shouldBe` sTake 101 (sInterleave (x:>s2) s1)
+            checkInterleave zeros nats
+            checkInterleave zeros ruler
+            checkInterleave nats ruler
+        describe "minMax functions" $ do
+            prop "minMaxSlow & minMax" $ do
+                \(xs::[Int]) -> minMaxSlow xs `shouldBe` minMax xs
+            prop "minMax & minMaxBang" $ do
+                \(xs::[Int]) -> minMax xs `shouldBe` minMaxBang xs

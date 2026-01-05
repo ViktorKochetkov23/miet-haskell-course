@@ -95,9 +95,6 @@ minMaxSlow xs = Just (minimum xs, maximum xs)
 
 {- -O0: Total time: ??? Total Memory in use: ??? -}
 {- -O2: Total time: ??? Total Memory in use: ??? -}
-modifyMinMaxPair :: Ord a => Maybe (a, a) -> a -> Maybe (a, a)
-modifyMinMaxPair Nothing x = Just (x, x)
-modifyMinMaxPair (Just (min, max)) x = Just (if min > x then x else min, if max < x then x else max)
 
 minMax [] = Nothing
 minMax (x: xs) = case minMax xs of
