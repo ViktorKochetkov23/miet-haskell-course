@@ -47,6 +47,7 @@ tests:
     - -with-rtsopts=-N
     dependencies:
     - Lab3
+    - QuickCheck
     - hspec
     - hspec-hedgehog
     - quickcheck-classes

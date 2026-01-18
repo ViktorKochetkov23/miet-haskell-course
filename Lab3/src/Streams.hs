@@ -143,26 +143,29 @@ main = print $ minMaxSlow $ sTake 1000000 $ ruler
 -- или http://hackage.haskell.org/package/hedgehog-classes, если в предыдущем задании использовали Hedgehog.
 
 instance Functor Stream where
-    fmap = undefined
+    fmap f (x:> xs) = (f x) :> fmap f xs
 
 instance Applicative Stream where
-    pure = undefined
-    (<*>) = undefined
+    pure = sRepeat
+    (f :> fs) <*> (x :> xs) = (f x) :> (fs <*> xs)
+
+sFirst :: Stream a -> a
+sFirst (x :> xs) = x
 
 instance Monad Stream where
     return = pure
     -- в этом случае может быть проще использовать реализацию через join
     -- xs >>= f = join ... where join = ...
-    (>>=) = undefined
+    xs >>= f = join (f <$> xs) where join (x :> xss) = (sFirst x :> (join xss))
 
 -- https://hackage.haskell.org/package/base-4.12.0.0/docs/Data-Foldable.html
 instance Foldable Stream where
     -- достаточно определить одну из них
-    -- foldr = undefined
+    foldr f acc (x :> xs) = f x (foldr f acc xs)
     -- foldMap = undefined
 
 -- https://hackage.haskell.org/package/base-4.12.0.0/docs/Data-Traversable.html
 instance Traversable Stream where
     -- достаточно определить одну из них
     -- traverse = undefined
-    -- sequenceA = undefined
+    sequenceA (x :> xs) = (:>) <$> x <*> sequenceA xs

@@ -1,14 +1,39 @@
 {-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE StandaloneDeriving #-}
 import FunctorsMonads
 import Streams hiding (main)
 import Test.Hspec
 -- Раскомментируйте QuickCheck или Hegdehog, в зависимости от того, что будете использовать
 -- Документация https://hspec.github.io/quickcheck.html
 import Test.Hspec.QuickCheck
+import Data.Proxy (Proxy(..))
+import Test.QuickCheck (Property, Arbitrary(..), CoArbitrary(..), infiniteList)
+import Test.QuickCheck.Classes
 -- Документация в https://github.com/parsonsmatt/hspec-hedgehog#readme
 -- import Test.Hspec.Hedgehog
 
 -- Добавьте минимум 5 тестов свойств для функций из первых 2 лабораторных (скопируйте определения тестируемых функций сюда).
+
+instance Arbitrary a => Arbitrary (Stream a) where
+    arbitrary = do
+        xs <- infiniteList
+        return $ streamFromList xs
+      where
+        streamFromList :: [a] -> Stream a
+        streamFromList (x:xs) = x :> streamFromList xs
+        streamFromList [] = error "Should not happen: infiniteList returned finite list"
+
+instance CoArbitrary a => CoArbitrary (Stream a) where
+    coarbitrary (x :> xs) = coarbitrary (x, xs)
+
+compareStreams :: Eq  a => Stream a -> Stream a -> Int -> Bool
+compareStreams (x1 :> xs1) (x2 :> xs2) n
+    | n == 1 = x1 == x2
+    | n <= 0 = error "Only positive number of elements to compare is allowed"
+    | n > 1 = if x1 == x2 then compareStreams xs1 xs2 (n-1) else False
+
+instance Eq a => Eq (Stream a) where
+    s1 == s2 = compareStreams s1 s2 1000
 
 main :: IO ()
 main = hspec $ do
@@ -114,3 +139,8 @@ main = hspec $ do
                 \(xs::[Int]) -> minMaxSlow xs `shouldBe` minMax xs
             prop "minMax & minMaxBang" $ do
                 \(xs::[Int]) -> minMax xs `shouldBe` minMaxBang xs
+        describe "Stream laws" $ do
+            it "Functor laws" $ do
+                lawsCheck (functorLaws (Proxy :: Proxy Stream))
+                lawsCheck (applicativeLaws (Proxy :: Proxy Stream))
+                lawsCheck (monadLaws (Proxy :: Proxy Stream))
